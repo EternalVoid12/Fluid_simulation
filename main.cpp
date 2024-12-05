@@ -290,7 +290,7 @@ int main(void)
         //for (int i = 0; i < size; i++) v[i]=1000.0f;
         get_from_UI(s,u_prev, v_prev);
         add_source(N, dens, s, dt);
-        for (int i = 0; i < size; i++) s[i]=0.0f;
+        //for (int i = 0; i < size; i++) s[i]=0.0f;
         add_source(N, u, u_prev, dt);
         add_source_v(N, v, v_prev, dt);
         vel_step(N, u, v, u_prev, v_prev, viscosity, dt);
