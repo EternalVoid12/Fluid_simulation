@@ -75,4 +75,4 @@ dens_step ( N, dens, dens_prev, u, v, diff, dt );
 draw_dens ( N, dens );
 }
 
-TODO: DO WITHOUT SOURCE
+TODO: DO WITHOUT SOURCE - done;

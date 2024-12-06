@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include "raylib.h"
 #include <random>
 #include <ctime>
 #include <string>
@@ -9,9 +8,10 @@
 #include <climits>
 #include <cstring>
 #include "solver.h"
+#include "raylib.h"
 
 
-const int N = 200; // Grid size (100x100)
+const int N = 100; // Grid size (100x100)
 const int size = (N+2)*(N+2); // Total grid size with boundary
 
 static float u[size], v[size], u_prev[size], v_prev[size];
