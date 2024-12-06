@@ -23,9 +23,14 @@ static float s[size];
 void add_source ( int N, float * x, float * s, float dt )
 {
     int i, size=(N+2)*(N+2);
-    for ( i=0 ; i<size ; i++ ) x[i] += dt*s[i];
+    for ( i=0 ; i<size ; i++ ) x[i] += dt*s[i]; //GENERATES DENSITY WITH TIME
 }
 void add_source_v ( int N, float * x, float * s, float dt )
+{
+    int i, size=(N+2)*(N+2);
+    for ( i=0 ; i<size ; i++ ) x[i] += dt*s[i];
+}
+void add_source_u ( int N, float * x, float * s, float dt )
 {
     int i, size=(N+2)*(N+2);
     for ( i=0 ; i<size ; i++ ) x[i] += dt*s[i];
@@ -83,7 +88,8 @@ set_bnd ( N, b, d );
 void dens_step ( int N, float * x, float * x0, float * u, float * v, float diff,
                 float dt )
 {
-    add_source ( N, x, x0, dt );
+    //add_source ( N, x, x0, dt );
+    SWAP(x0, x) // Ads density as it is not as source
     SWAP ( x0, x ); diffuse ( N, 0, x, x0, diff, dt );
     SWAP ( x0, x ); advect ( N, 0, x, x0, u, v, dt );
 }
@@ -123,7 +129,7 @@ void project ( int N, float * u, float * v, float * p, float * div )
 void vel_step ( int N, float * u, float * v, float * u0, float * v0,
 float visc, float dt )
 {
-    add_source ( N, u, u0, dt ); add_source_v ( N, v, v0, dt );
+    add_source_u ( N, u, u0, dt ); add_source_v ( N, v, v0, dt );
     SWAP ( u0, u ); diffuse ( N, 1, u, u0, visc, dt );
     SWAP ( v0, v ); diffuse ( N, 2, v, v0, visc, dt );
     project ( N, u, v, u0, v0 );
@@ -141,24 +147,24 @@ void get_from_UI(float* s, float* u_prev, float* v_prev)
     int j_grid = (int)(mousePos.y / GetScreenHeight() * N) + 1; // Y grid position
 
     // Check if the left mouse button is being pressed
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
-        float source_strength = 2500.0f; // Adjust as needed
-        s[i_grid + j_grid * (N + 2)] += source_strength;
+        float source_strength = 250.0f; // Adjust as needed
+        s[i_grid + j_grid * (N + 2)] = source_strength;
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
-        float source_strength = 2500.0f; // Adjust as needed
+        float source_strength = 25000.0f; // Adjust as needed
         u_prev[i_grid + j_grid * (N + 2)] += source_strength;
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
-        float source_strength = 2500.0f; // Adjust as needed
+        float source_strength = 25000.0f; // Adjust as needed
         v_prev[i_grid + j_grid * (N + 2)] += source_strength;
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
@@ -189,9 +195,9 @@ void draw_dens(int N, float *dens)
             //if(density>255) dens[index] = f;
             Color color;
             if (density >= 0 && density <= 255) {  // Ensure velocity is within the valid color range
-                color = {static_cast<unsigned char>((int)density*50),0,0,255};  // Cast to unsigned char for proper range
+                color = {static_cast<unsigned char>((int)density%255),0,0,255};  // Cast to unsigned char for proper range
             } else {
-                dens[index] = 255.0f;  // Set the corresponding value to 0 if velocity is out of range
+                dens[index] = 0.0f;  // Set the corresponding value to 0 if velocity is out of range
             }              // Black for zero or low density
 
             // Draw the rectangle at the position (scaled to screen)
@@ -281,7 +287,7 @@ int main(void)
 
 
     //const float dt = 0.1f;
-    const float diffusion = 1.0f;
+    const float diffusion = 0.00001f;
     const float viscosity = 5.0f;
 
     Vector2 ballPosition = { -100.0f, -100.0f };
@@ -293,14 +299,24 @@ int main(void)
 
     float dt = 1.0f/60.0f;
     int timeStamp = 0;
-    int stepCounter = 0;
+    //int stepCounter = 0;
 
     std::random_device rd; // Источник случайности
     std::mt19937 gen(rd()); // Генератор случайных чисел
+    
     std::uniform_real_distribution<float> dens_dis(0.0f, 100.0f); // Равномерное распределение
     std::uniform_real_distribution<float> color_dis(-255.0f, 0.0f);
     std::uniform_int_distribution<int> radius_dis(0, 50);
-    
+    for (int i = 1; i <= N; i++) {
+    for (int j = 1; j <= N; j++) {
+    // Calculate the index for the current grid cell
+    int index = i + j * (N + 2); // +2 to account for boundary cells
+        //v[index]=color_dis(gen);
+        //u[index] = color_dis(gen);
+        //s[index] = dens_dis(gen);
+
+    }
+    }
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -309,23 +325,23 @@ int main(void)
         // TODO: Update your variables here
         //----------------------------------------------------------------------------------
         timeStamp+=1;
-        ballPosition = GetMousePosition(); // IT AFFECTS V_PREV SOMEHOW!!!!
+        ballPosition = GetMousePosition(); // IT AFFECTS V_PREV SOMEHOW!!!!NOt
         //for (int i = 0; i < size; i++) v_prev[i]=200.0f; //draw newgative velocity too
         for (int i = 1; i <= N; i++) {
         for (int j = 1; j <= N; j++) {
         // Calculate the index for the current grid cell
-        int index = i + j * (N + 2); // +2 to account for boundary cells
+            int index = i + j * (N + 2); // +2 to account for boundary cells
             //v[index]=color_dis(gen);
             //u[index] = color_dis(gen);
+            //dens_prev[index] = dens_dis(gen);
 
         }
         }
         //for (int i = 0; i < size; i++) v[i]=1000.0f;
-        get_from_UI(s,u_prev, v_prev);
-        add_source(N, dens, s, dt);
+        get_from_UI(dens_prev,u_prev, v_prev);
+
         //for (int i = 0; i < size; i++) s[i]=0.0f;
-        add_source(N, u, u_prev, dt);
-        add_source_v(N, v, v_prev, dt);
+
         vel_step(N, u, v, u_prev, v_prev, viscosity, dt);
         dens_step(N, dens, dens_prev, u, v, diffusion, dt);
         

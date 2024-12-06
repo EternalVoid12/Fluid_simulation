@@ -62,6 +62,7 @@
 		"iostream": "cpp",
 		"istream": "cpp",
 		"climits": "cpp",
-		"cstring": "cpp"
+		"cstring": "cpp",
+		"bitset": "cpp"
 	}
 }
