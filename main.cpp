@@ -146,25 +146,35 @@ void get_from_UI(float* s, float* u_prev, float* v_prev)
     int i_grid = (int)(mousePos.x / GetScreenWidth() * N) + 1; // X grid position
     int j_grid = (int)(mousePos.y / GetScreenHeight() * N) + 1; // Y grid position
 
+    if (IsKeyDown(KEY_R)){
+        //int source_radius = 10;
+        float source_strength = 250.0f; // Adjust as needed
+        for (int i = i_grid; i <= (10 + i_grid); i++) {
+            for (int j = j_grid; j <= (10 + j_grid); j++) {
+                    s[i + j * (N + 2)] = source_strength;
+            }
+        }
+    }
     // Check if the left mouse button is being pressed
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
         float source_strength = 250.0f; // Adjust as needed
         s[i_grid + j_grid * (N + 2)] = source_strength;
+        
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
-        float source_strength = 25000.0f; // Adjust as needed
+        float source_strength = 2500.0f; // Adjust as needed
         u_prev[i_grid + j_grid * (N + 2)] += source_strength;
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
-        float source_strength = 25000.0f; // Adjust as needed
+        float source_strength = 2500.0f; // Adjust as needed
         v_prev[i_grid + j_grid * (N + 2)] += source_strength;
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
