@@ -76,3 +76,11 @@ draw_dens ( N, dens );
 }
 
 TODO: DO WITHOUT SOURCE - done;
+
+
+    //std::random_device rd; 
+    //std::mt19937 gen(rd());
+    
+    //std::uniform_real_distribution<float> dens_dis(0.0f, 100.0f);
+    //std::uniform_real_distribution<float> color_dis(-255.0f, 0.0f);
+    //std::uniform_int_distribution<int> radius_dis(0, 50);

@@ -7,6 +7,7 @@
 	"settings": {
 		"files.associations": {
 			"raylib.h": "c",
+			"raygui.h": "c",
 			"math.h": "c",
 			"blocks.h": "c",
 			"stdio.h": "c",
