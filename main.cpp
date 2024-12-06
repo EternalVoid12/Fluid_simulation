@@ -5,6 +5,9 @@
 #include <ctime>
 #include <string>
 #include <iostream>
+#include <bitset>
+#include <climits>
+#include <cstring>
 
 #define IX(i,j) ((i)+(N+2)*(j))
 #define SWAP(x0,x) {float *tmp=x0;x0=x;x=tmp;}
@@ -15,6 +18,7 @@ const int size = (N+2)*(N+2); // Total grid size with boundary
 static float u[size], v[size], u_prev[size], v_prev[size];
 static float dens[size], dens_prev[size]; 
 static float s[size];
+
 
 void add_source ( int N, float * x, float * s, float dt )
 {
@@ -137,24 +141,24 @@ void get_from_UI(float* s, float* u_prev, float* v_prev)
     int j_grid = (int)(mousePos.y / GetScreenHeight() * N) + 1; // Y grid position
 
     // Check if the left mouse button is being pressed
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
-        float source_strength = 25000.0f; // Adjust as needed
+        float source_strength = 2500.0f; // Adjust as needed
         s[i_grid + j_grid * (N + 2)] += source_strength;
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
-        float source_strength = 250.0f; // Adjust as needed
+        float source_strength = 2500.0f; // Adjust as needed
         u_prev[i_grid + j_grid * (N + 2)] += source_strength;
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
         if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
-        float source_strength = 250.0f; // Adjust as needed
+        float source_strength = 2500.0f; // Adjust as needed
         v_prev[i_grid + j_grid * (N + 2)] += source_strength;
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
@@ -172,8 +176,8 @@ void draw_dens(int N, float *dens)
     int cellHeight = screenHeight / N;
 
     // Iterate over the grid (skip the boundary cells)
-    for (int i = 0; i <= N; i++) {
-        for (int j = 0; j <= N; j++) {
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= N; j++) {
             // Calculate the index for the current grid cell
             int index = i + j*(N+2); // +2 to account for boundary cells
 
@@ -183,10 +187,12 @@ void draw_dens(int N, float *dens)
             // Map the density value to a color (you can adjust this to your liking)
             // For example, we map the density value (between 0 and some max value) to a color
             //if(density>255) dens[index] = f;
-            
-            Color color = (density > 0) 
-                ? (Color){static_cast<unsigned char>((int)density), 0, 0, 255}  // Red for positive density
-                : (Color){0, 0, 0 , 255};               // Black for zero or low density
+            Color color;
+            if (density >= 0 && density <= 255) {  // Ensure velocity is within the valid color range
+                color = {static_cast<unsigned char>((int)density*50),0,0,255};  // Cast to unsigned char for proper range
+            } else {
+                dens[index] = 255.0f;  // Set the corresponding value to 0 if velocity is out of range
+            }              // Black for zero or low density
 
             // Draw the rectangle at the position (scaled to screen)
             DrawRectangle(i * cellWidth, j * cellHeight, cellWidth, cellHeight, color);
@@ -216,8 +222,39 @@ void draw_velocity(int N, float* v)
             // For example, we map the density value (between 0 and some max value) to a color
             if (velocity >= 0 && velocity <= 255) {  // Ensure velocity is within the valid color range
                 color = {static_cast<unsigned char>((int)velocity*10),0,0,255};  // Cast to unsigned char for proper range
-            } else {
-                v[index] = 255.0f;  // Set the corresponding value to 0 if velocity is out of range
+            } else if(velocity <= 0 && velocity >= -255) {
+                color = {0,0,static_cast<unsigned char>((int)abs(velocity)*10),255};  // Set the corresponding value to 0 if velocity is out of range
+            }
+            // Draw the rectangle at the position (scaled to screen)
+            DrawRectangle(i * cellWidth, j * cellHeight, cellWidth, cellHeight, color);
+        }
+    }
+}
+void draw_forces(int N, float* u)
+{
+    // Get the screen width and height
+    int screenWidth = GetScreenWidth();
+    int screenHeight = GetScreenHeight();
+
+    // Size of each grid cell in pixels (scaling factor)
+    int cellWidth = screenWidth / N;
+    int cellHeight = screenHeight / N;
+
+    // Iterate over the grid (skip the boundary cells)
+    for (int i = 1; i <= N; i++) {
+        for (int j = 1; j <= N; j++) {
+            // Calculate the index for the current grid cell
+            int index = i + j * (N + 2); // +2 to account for boundary cells
+
+            // Get the density at this grid cell
+            float force = u[index];
+            Color color;
+            // Map the density value to a color (you can adjust this to your liking)
+            // For example, we map the density value (between 0 and some max value) to a color
+            if (force >= 0 && force <= 255) {  // Ensure velocity is within the valid color range
+                color = {static_cast<unsigned char>((int)force*10),0,0,255};  // Cast to unsigned char for proper range
+            } else if(force <= 0 && force >= -255) {
+                color = {0,0,static_cast<unsigned char>((int)abs(force)*10),255};  // Set the corresponding value to 0 if velocity is out of range
             }
             // Draw the rectangle at the position (scaled to screen)
             DrawRectangle(i * cellWidth, j * cellHeight, cellWidth, cellHeight, color);
@@ -229,12 +266,22 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 800;
+    for (int i = 0; i < size; ++i) {
+    u[i] = 0.0f;
+    v[i] = 0.0f;
+    u_prev[i] = 0.0f;
+    v_prev[i] = 0.0f;
+    dens[i] = 0.0f;
+    dens_prev[i] = 0.0f;
+    s[i] = 0.0f;
+    }
+
+    const int screenWidth = 1000;
+    const int screenHeight = 1000;
 
 
     //const float dt = 0.1f;
-    const float diffusion = 0.1f;
+    const float diffusion = 1.0f;
     const float viscosity = 5.0f;
 
     Vector2 ballPosition = { -100.0f, -100.0f };
@@ -251,24 +298,8 @@ int main(void)
     std::random_device rd; // Источник случайности
     std::mt19937 gen(rd()); // Генератор случайных чисел
     std::uniform_real_distribution<float> dens_dis(0.0f, 100.0f); // Равномерное распределение
-    std::uniform_int_distribution<int> color_dis(0, 255);
+    std::uniform_real_distribution<float> color_dis(-255.0f, 0.0f);
     std::uniform_int_distribution<int> radius_dis(0, 50);
-    
-    //for (int i = 0; i < size; i++) v[i]=10000.0f;
-    //for (int i = 0; i < size; i++) u[i]=100.0f;
-    //for (int i = 0; i < size; i++) [i]=100.0f;
-    //srand((unsigned int)time(NULL));
-    // Fill the source array with random values
-    //for (int i = 0; i < size; i++) {
-        // Generate a random float between 0.0 and 1.0
-     //   float random_value = (float)rand() / RAND_MAX;  // Random float between 0 and 1
-        
-        // Optionally, scale the value if needed (e.g., to simulate different strengths)
-    //    float scaled_value = random_value * 100.0f;  // Scale to an arbitrary max value (e.g., 100.0f)
-        
-        // Assign the scaled value to the source array
-     //   s[i] = scaled_value;
-   // }
     
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -278,20 +309,21 @@ int main(void)
         // TODO: Update your variables here
         //----------------------------------------------------------------------------------
         timeStamp+=1;
-        ballPosition = GetMousePosition();
-        //for (int i = 0; i < size; i++) v_prev[i]=50.0f; //draw newgative velocity too
+        ballPosition = GetMousePosition(); // IT AFFECTS V_PREV SOMEHOW!!!!
+        //for (int i = 0; i < size; i++) v_prev[i]=200.0f; //draw newgative velocity too
         for (int i = 1; i <= N; i++) {
         for (int j = 1; j <= N; j++) {
-            // Calculate the index for the current grid cell
-            //int index = i + j * (N + 2); // +2 to account for boundary cells
-            //    v_prev[index]=100.0f;
+        // Calculate the index for the current grid cell
+        int index = i + j * (N + 2); // +2 to account for boundary cells
+            //v[index]=color_dis(gen);
+            //u[index] = color_dis(gen);
 
-            }
+        }
         }
         //for (int i = 0; i < size; i++) v[i]=1000.0f;
         get_from_UI(s,u_prev, v_prev);
         add_source(N, dens, s, dt);
-        for (int i = 0; i < size; i++) s[i]=0.0f;
+        //for (int i = 0; i < size; i++) s[i]=0.0f;
         add_source(N, u, u_prev, dt);
         add_source_v(N, v, v_prev, dt);
         vel_step(N, u, v, u_prev, v_prev, viscosity, dt);
@@ -312,8 +344,12 @@ int main(void)
             ClearBackground(RAYWHITE);
 
             if (IsKeyDown(KEY_SPACE)) {
-                draw_velocity(N,v_prev);
-            } else {
+                draw_velocity(N,v);
+                //draw_forces(N,u);
+            } else if(IsKeyDown(KEY_F)) 
+            {
+                draw_forces(N,u);
+            } else{
                 draw_dens(N,dens);
             }
             DrawCircleV(ballPosition, 5, ballColor);
