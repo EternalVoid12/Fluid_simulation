@@ -15,6 +15,7 @@ const int size = (N+2)*(N+2); // Total grid size with boundary
 static float u[size], v[size], u_prev[size], v_prev[size];
 static float dens[size], dens_prev[size]; 
 static float s[size];
+
 void add_source ( int N, float * x, float * s, float dt )
 {
     int i, size=(N+2)*(N+2);
@@ -55,22 +56,22 @@ void diffuse ( int N, int b, float * x, float * x0, float diff, float dt )
 }
 void advect ( int N, int b, float * d, float * d0, float * u, float * v, float dt )
 {
-int i, j, i0, j0, i1, j1;
-float x, y, s0, t0, s1, t1, dt0;
-dt0 = dt*N;
-for ( i=1 ; i<=N ; i++ ) {
-    for ( j=1 ; j<=N ; j++ ) {
-    x = i-dt0*u[IX(i,j)]; y = j-dt0*v[IX(i,j)];
-    if (x<0.5) x=0.5; 
-    if (x>N+0.5) x=N+ 0.5; //TODO: CHEck if statements
-    i0=(int)x; 
-    i1=i0+1;
-    if (y<0.5) y=0.5; 
-    if (y>N+0.5) y=N+ 0.5; 
-    j0=(int)y; 
-    j1=j0+1;
-    s1 = x-i0; s0 = 1-s1; t1 = y-j0; t0 = 1-t1;
-    d[IX(i,j)] = s0*(t0*d0[IX(i0,j0)]+t1*d0[IX(i0,j1)])+ s1*(t0*d0[IX(i1,j0)]+t1*d0[IX(i1,j1)]);
+    int i, j, i0, j0, i1, j1;
+    float x, y, s0, t0, s1, t1, dt0;
+    dt0 = dt*N;
+    for ( i=1 ; i<=N ; i++ ) {
+        for ( j=1 ; j<=N ; j++ ) {
+        x = i-dt0*u[IX(i,j)]; y = j-dt0*v[IX(i,j)];
+        if (x<0.5) x=0.5; 
+        if (x>N+0.5) x=N+ 0.5; //TODO: CHEck if statements
+        i0=(int)x; 
+        i1=i0+1;
+        if (y<0.5) y=0.5; 
+        if (y>N+0.5) y=N+ 0.5; 
+        j0=(int)y; 
+        j1=j0+1;
+        s1 = x-i0; s0 = 1-s1; t1 = y-j0; t0 = 1-t1;
+        d[IX(i,j)] = s0*(t0*d0[IX(i0,j0)]+t1*d0[IX(i0,j1)])+ s1*(t0*d0[IX(i1,j0)]+t1*d0[IX(i1,j1)]);
 }
 }
 set_bnd ( N, b, d );
@@ -139,14 +140,14 @@ void get_from_UI(float* s, float* u_prev, float* v_prev)
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
-        float source_strength = 250.0f; // Adjust as needed
+        float source_strength = 25000.0f; // Adjust as needed
         s[i_grid + j_grid * (N + 2)] += source_strength;
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
     {
         // Add a source of density at the mouse position (you can adjust the strength)
-        float source_strength = 1000.0f; // Adjust as needed
+        float source_strength = 250.0f; // Adjust as needed
         u_prev[i_grid + j_grid * (N + 2)] += source_strength;
         //d[i_grid + j_grid * (N + 2)] += source_strength;
     }
@@ -214,9 +215,9 @@ void draw_velocity(int N, float* v)
             // Map the density value to a color (you can adjust this to your liking)
             // For example, we map the density value (between 0 and some max value) to a color
             if (velocity >= 0 && velocity <= 255) {  // Ensure velocity is within the valid color range
-                color = {static_cast<unsigned char>((int)velocity),0,0,255};  // Cast to unsigned char for proper range
+                color = {static_cast<unsigned char>((int)velocity*10),0,0,255};  // Cast to unsigned char for proper range
             } else {
-                v[index] = 0;  // Set the corresponding value to 0 if velocity is out of range
+                v[index] = 255.0f;  // Set the corresponding value to 0 if velocity is out of range
             }
             // Draw the rectangle at the position (scaled to screen)
             DrawRectangle(i * cellWidth, j * cellHeight, cellWidth, cellHeight, color);
@@ -252,7 +253,7 @@ int main(void)
     std::uniform_real_distribution<float> dens_dis(0.0f, 100.0f); // Равномерное распределение
     std::uniform_int_distribution<int> color_dis(0, 255);
     std::uniform_int_distribution<int> radius_dis(0, 50);
-
+    
     //for (int i = 0; i < size; i++) v[i]=10000.0f;
     //for (int i = 0; i < size; i++) u[i]=100.0f;
     //for (int i = 0; i < size; i++) [i]=100.0f;
@@ -278,45 +279,43 @@ int main(void)
         //----------------------------------------------------------------------------------
         timeStamp+=1;
         ballPosition = GetMousePosition();
-        //for (int i = 0; i < size; i++) v_prev[i]=1000.0f; //draw newgative velocity too
+        //for (int i = 0; i < size; i++) v_prev[i]=50.0f; //draw newgative velocity too
         for (int i = 1; i <= N; i++) {
         for (int j = 1; j <= N; j++) {
             // Calculate the index for the current grid cell
-            int index = i + j * (N + 2); // +2 to account for boundary cells
-            v[index]=0.0f;
+            //int index = i + j * (N + 2); // +2 to account for boundary cells
+            //    v_prev[index]=100.0f;
 
             }
         }
         //for (int i = 0; i < size; i++) v[i]=1000.0f;
         get_from_UI(s,u_prev, v_prev);
         add_source(N, dens, s, dt);
-        //for (int i = 0; i < size; i++) s[i]=0.0f;
+        for (int i = 0; i < size; i++) s[i]=0.0f;
         add_source(N, u, u_prev, dt);
         add_source_v(N, v, v_prev, dt);
         vel_step(N, u, v, u_prev, v_prev, viscosity, dt);
         dens_step(N, dens, dens_prev, u, v, diffusion, dt);
         
         //for (int i = 0; i < size; i++) s[i]=0.0f;
-        stepCounter++;
-        if (stepCounter>=1000)
-        {   
-            stepCounter = 0;
-            for (int i = 0; i < size; ++i) 
-            {
+        if (IsKeyPressed(KEY_A)){
                 //for(int i = 0; i < size; i++) std::cout<<s[i];
-                //s[i] = 0.0f;  // Reset each element to 0
-                //dens[i] = 0.0f;
-                //dens_prev[i] = 0.0f;
+                for(int i = 0; i < size; i++) s[i]=0.0f;
+                for(int i = 0; i < size; i++) dens[i]=0.0f;
+                for(int i = 0; i < size; i++) dens_prev[i]=0.0f;
             }
-        }
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
 
 
             ClearBackground(RAYWHITE);
-            draw_dens(N,dens);
-            //draw_velocity(N,v);
+
+            if (IsKeyDown(KEY_SPACE)) {
+                draw_velocity(N,v_prev);
+            } else {
+                draw_dens(N,dens);
+            }
             DrawCircleV(ballPosition, 5, ballColor);
             DrawFPS(10, 10); 
             std::string str = std::to_string(timeStamp);
