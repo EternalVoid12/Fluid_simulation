@@ -64,6 +64,9 @@
 		"climits": "cpp",
 		"cstring": "cpp",
 		"bitset": "cpp",
-		"*.m": "cpp"
+		"*.m": "cpp",
+		"fstream": "cpp",
+		"set": "cpp",
+		"sstream": "cpp"
 	}
 }

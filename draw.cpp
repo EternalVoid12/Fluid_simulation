@@ -2,19 +2,42 @@
 #include <math.h>
 #include "raylib.h"
 #include "raygui.h"
+#include "Settings.h"
 
-void Draw::draw_sliders(float diffusion,float new_diffusion, float viscosity, float new_viscosity, int screenWidth ){
-            const float minDiffusion = 0.00001f;
-            const float maxDiffusion = 0.01f;
+void Draw::draw_sliders_1(float* diffusion,float new_diffusion, float* viscosity, float new_viscosity, Settings settings){
 
-            new_diffusion = GuiSlider((Rectangle){ screenWidth + 50, 100, 200, 30 }, NULL, NULL, &diffusion, minDiffusion, maxDiffusion);
-            DrawText(TextFormat("diffusion: %0.5f", diffusion), screenWidth + 50, 150, 10, BLACK);
+            new_diffusion = GuiSlider((Rectangle){ settings.screenWidth + 50, 100, 200, 30 }, NULL, NULL, diffusion, 
+                                      settings.minDiffusion, settings.maxDiffusion);
+            DrawText(TextFormat("diffusion: %0.5f", *diffusion), settings.screenWidth + 50, 150, 10, BLACK);
+ 
+            new_viscosity = GuiSlider((Rectangle){ settings.screenWidth + 50, 200, 200, 30 }, NULL, NULL, viscosity,
+                                      settings.minViscosity, settings.maxViscosity);
+            DrawText(TextFormat("viscosity: %0.4f", *viscosity), settings.screenWidth + 50, 250, 10, BLACK);
+}
 
-            const float minViscosity = 0.1f;
-            const float maxViscosity = 10.0f;
+void Draw::draw_sliders_2(float* Source_strength_u,float new_Source_strength_u, float* Source_strength_v, float new_Source_strength_v, int screenWidth ){
+            const float minSource_strength_u = -2000.0f;
+            const float maxSource_strength_u = 2000.0f;
+            new_Source_strength_u = GuiSlider((Rectangle){ screenWidth + 50, 300, 200, 30 }, NULL, NULL, 
+                                                          Source_strength_u, minSource_strength_u, maxSource_strength_u);
+            DrawText(TextFormat("Source_u: %0.1f", Source_strength_u), screenWidth + 50, 350, 10, BLACK);
 
-            new_viscosity = GuiSlider((Rectangle){ screenWidth + 50, 200, 200, 30 }, NULL, NULL, &viscosity, minViscosity, maxViscosity);
-            DrawText(TextFormat("viscosity: %0.4f", viscosity), screenWidth + 50, 250, 10, BLACK);
+            const float minSource_strength_v = -2000.0f;
+            const float maxSource_strength_v = 2000.0f;
+            new_Source_strength_v = GuiSlider((Rectangle){ screenWidth + 50, 400, 200, 30 }, NULL, NULL, 
+                                                          Source_strength_v, minSource_strength_v, maxSource_strength_v);
+            DrawText(TextFormat("Source_u: %0.1f", Source_strength_v), screenWidth + 50, 450, 10, BLACK);
+}
+void Draw::draw_checkboxes(bool* rnd_forces, bool* rnd_velocities, bool* rnd_dens, int screenWidth){
+
+            DrawText(TextFormat("Random u:"), screenWidth + 50, 500, 10, BLACK);
+            GuiCheckBox((Rectangle){ screenWidth + 150, 500, 30, 30 },NULL, rnd_forces);
+
+            DrawText(TextFormat("Random v:"), screenWidth + 50, 550, 10, BLACK);
+            GuiCheckBox((Rectangle){ screenWidth + 150, 550, 30, 30 },NULL, rnd_velocities);
+
+            DrawText(TextFormat("Random dens:"), screenWidth + 50, 600, 10, BLACK);
+            GuiCheckBox((Rectangle){ screenWidth + 150, 600, 30, 30 },NULL, rnd_dens);
 }
 
 void Draw::draw_dens(int N, float *dens, int interface)
