@@ -40,7 +40,7 @@ void Draw::draw_checkboxes(bool* rnd_forces, bool* rnd_velocities, bool* rnd_den
             GuiCheckBox((Rectangle){ screenWidth + 150, 600, 30, 30 },NULL, rnd_dens);
 }
 
-void Draw::draw_dens(int N, float *dens, int interface)
+void Draw::draw_dens(int N, float *dens, int interface,  Color new_color)
 {
     // Get the screen width and height
     int screenWidth = GetScreenWidth();
@@ -62,9 +62,14 @@ void Draw::draw_dens(int N, float *dens, int interface)
             // Map the density value to a color (you can adjust this to your liking)
             // For example, we map the density value (between 0 and some max value) to a color
             //if(density>255) dens[index] = f;
+            unsigned char r = static_cast<unsigned char>((new_color.r * density) / 255);
+            unsigned char g = static_cast<unsigned char>((new_color.g * density) / 255);
+            unsigned char b = static_cast<unsigned char>((new_color.b * density) / 255);
             Color color;
             if (density >= 0 && density <= 255) {  // Ensure velocity is within the valid color range
-                color = {static_cast<unsigned char>((int)density%255),0,0,255};  // Cast to unsigned char for proper range
+                //color = {new_color.r,new_color.b,new_color.g,static_cast<unsigned char>((int)density)};  // Cast to unsigned char for proper range
+                color = {r,g,b,255};  // Cast to unsigned char for proper range
+
             } else {
                 dens[index] = 0.0f;  // Set the corresponding value to 0 if velocity is out of range
             }              // Black for zero or low density

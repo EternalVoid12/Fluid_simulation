@@ -66,6 +66,9 @@ int main(void)
     float dt = 1.0f/((float)TargetFPS);
     int timeStamp = 0;
 
+    Color color;
+    color = {0,0,0,255};
+
     std::random_device rd; 
     std::mt19937 gen(rd());
     
@@ -112,7 +115,7 @@ int main(void)
                 draw.draw_forces(N,u, settings.interfaceWidth);
             } else
             {
-                draw.draw_dens(N,dens, settings.interfaceWidth);
+                draw.draw_dens(N,dens, settings.interfaceWidth, color);
             }
 
             //draw.draw_sliders(diffusion,new_diffusion,viscosity,new_viscosity,screenWidth); // Maybe rewrite this
@@ -133,6 +136,8 @@ int main(void)
             DrawText(TextFormat("Source_u: %0.1f", Source_strength_v), screenWidth + 50, 450, 10, BLACK);
 
             draw.draw_checkboxes(&rnd_forces, &rnd_velocities, &rnd_dens, screenWidth);
+
+            GuiColorPicker((Rectangle){screenWidth + 20, 700, 200, 200 },NULL, &color);
 
             DrawFPS(10, 10); 
             std::string str = std::to_string(timeStamp);
