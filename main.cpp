@@ -18,7 +18,7 @@
 #include "raygui.h"
 
 //THIS VALUE IS HARDCODED
-const int N = 200; // Grid size (100x100)
+const int N = 100; // Grid size (100x100)
 const int size = (N+2)*(N+2); // Total grid size with boundary
 
 static float u[size], v[size], u_prev[size], v_prev[size];
@@ -60,6 +60,7 @@ int main(void)
 
     InitWindow(screenWidth + settings.interfaceWidth, screenHeight, "Fluid");
 
+    int framesCounter = 0;
     int TargetFPS = settings.TargetFPS;
     SetTargetFPS(TargetFPS);               // Set our simulation to run at 60 frames-per-second
 
@@ -68,6 +69,8 @@ int main(void)
 
     Color color;
     color = {255,0,0,255};
+
+    bool pause=false;
 
     std::random_device rd; 
     std::mt19937 gen(rd());
@@ -84,12 +87,14 @@ int main(void)
         //----------------------------------------------------------------------------------
         //  Update your variables here
         //----------------------------------------------------------------------------------
-        //timeStamp+=1;
+        framesCounter+=1;
 
-        input.get_from_UI(N, dens_prev,u_prev, v_prev, settings.interfaceWidth, Source_strength_u, Source_strength_v);
-        solver.vel_step(N, u, v, u_prev, v_prev, viscosity, dt);
-        solver.dens_step(N, dens, dens_prev, u, v, diffusion, dt);
-
+        if(!pause)
+        {
+            input.get_from_UI(N, dens_prev,u_prev, v_prev, settings.interfaceWidth, Source_strength_u, Source_strength_v);
+            solver.vel_step(N, u, v, u_prev, v_prev, viscosity, dt);
+            solver.dens_step(N, dens, dens_prev, u, v, diffusion, dt);
+        }
         if (rnd_forces) for(int i=0; i<size;i++) u_prev[i] = u_dis(gen); //set random force distribution
         if (rnd_velocities) for(int i=0; i<size;i++) v_prev[i] = v_dis(gen);
         if(rnd_dens) for(int i=0; i<size;i++) dens_prev[i] = d_dis(gen);
@@ -100,14 +105,16 @@ int main(void)
                 for(int i = 0; i < size; i++) dens[i]=0.0f;
                 for(int i = 0; i < size; i++) dens_prev[i]=0.0f;
         }
-        
+
+        if (IsKeyPressed(KEY_SPACE)) pause = !pause;
+
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
 
-            if (IsKeyDown(KEY_SPACE)) 
+            if (IsKeyDown(KEY_V)) 
             {
                 draw.draw_velocity(N,v, settings.interfaceWidth );
             } else if(IsKeyDown(KEY_F)) 
@@ -139,9 +146,10 @@ int main(void)
 
             GuiColorPicker((Rectangle){screenWidth + 20, 700, 200, 200 },NULL, &color);
 
+            if (pause && ((framesCounter/30)%2)) DrawText("PAUSED", 350, 200, 30, WHITE);
+
             DrawFPS(10, 10); 
-            std::string str = std::to_string(timeStamp);
-            DrawText(str.c_str(),10,30,20, WHITE);
+
 
         EndDrawing();
         //----------------------------------------------------------------------------------
