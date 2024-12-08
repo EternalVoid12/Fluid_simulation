@@ -103,7 +103,7 @@ void Draw::draw_velocity(int N, float* v, int interface)
             if (velocity >= 0 && velocity <= 255) {  // Ensure velocity is within the valid color range
                 color = {static_cast<unsigned char>((int)velocity*10),0,0,255};  // Cast to unsigned char for proper range
             } else if(velocity <= 0 && velocity >= -255) {
-                color = {0,0,static_cast<unsigned char>((int)abs(velocity)*10),255};  // Set the corresponding value to 0 if velocity is out of range
+                color = {0,0,static_cast<unsigned char>((int)abs(velocity)),255};  // Set the corresponding value to 0 if velocity is out of range
             }
             // Draw the rectangle at the position (scaled to screen)
             DrawRectangle(i * cellWidth, j * cellHeight, cellWidth, cellHeight, color);
@@ -133,7 +133,7 @@ void Draw::draw_forces(int N, float* u, int interface)
             if (force >= 0 && force <= 255) {  // Ensure velocity is within the valid color range
                 color = {static_cast<unsigned char>((int)force*10),0,0,255};  // Cast to unsigned char for proper range
             } else if(force <= 0 && force >= -255) {
-                color = {0,0,static_cast<unsigned char>((int)abs(force)*10),255};  // Set the corresponding value to 0 if velocity is out of range
+                color = {0,0,static_cast<unsigned char>((int)abs(force)),255};  // Set the corresponding value to 0 if velocity is out of range
             }
             // Draw the rectangle at the position (scaled to screen)
             DrawRectangle(i * cellWidth, j * cellHeight, cellWidth, cellHeight, color);

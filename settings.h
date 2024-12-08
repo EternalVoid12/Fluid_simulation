@@ -14,9 +14,6 @@ class Settings
         float viscosity;
         float Source_strength_u;
         float Source_strength_v;
-        bool rnd_forces = false;
-        bool rnd_velocities = false;
-        bool rnd_dens = false;
         float minDiffusion;
         float maxDiffusion;
         float minViscosity;

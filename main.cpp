@@ -67,7 +67,7 @@ int main(void)
     int timeStamp = 0;
 
     Color color;
-    color = {0,0,0,255};
+    color = {255,0,0,255};
 
     std::random_device rd; 
     std::mt19937 gen(rd());
